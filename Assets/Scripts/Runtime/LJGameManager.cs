@@ -8,77 +8,79 @@ using UnityEngine;
 
 public class LJGameManager : GameManager
 {
-    [Header("Holders")]
-    [SerializeField] private GameObject _monoSystemParnet;
+	[Header("Holders")]
+	[SerializeField] private GameObject _monoSystemParnet;
 
-    [Header("MonoSystems")]
-    [SerializeField] private UIMonoSystem _uiMonoSystem;
-    [SerializeField] private AnimationMonoSystem _animationMonoSystem;
-    [SerializeField] private AudioMonoSystem _audioMonoSystem;
+	[Header("MonoSystems")]
+	[SerializeField] private UIMonoSystem _uiMonoSystem;
+	[SerializeField] private AnimationMonoSystem _animationMonoSystem;
+	[SerializeField] private AudioMonoSystem _audioMonoSystem;
+	[SerializeField] private GridMonoSystem _gridMonoSystem;
 
-    /// <summary>
-    /// Adds all events listeners
-    /// </summary>
-    private void AddListeners()
-    {
+	/// <summary>
+	/// Adds all events listeners
+	/// </summary>
+	private void AddListeners()
+	{
 
-    }
+	}
 
-    /// <summary>
-    /// Removes all events listeners
-    /// </summary>
-    private void RemoveListeners()
-    {
+	/// <summary>
+	/// Removes all events listeners
+	/// </summary>
+	private void RemoveListeners()
+	{
 
-    }
+	}
 
-    /// <summary>
-    /// Attaches all MonoSystems to the GameManager
-    /// </summary>
-    private void AttachMonoSystems()
-    {
-        AddMonoSystem<UIMonoSystem, IUIMonoSystem>(_uiMonoSystem);
-        AddMonoSystem<AnimationMonoSystem, IAnimationMonoSystem>(_animationMonoSystem);
-        AddMonoSystem<AudioMonoSystem, IAudioMonoSystem>(_audioMonoSystem);
-    }
+	/// <summary>
+	/// Attaches all MonoSystems to the GameManager
+	/// </summary>
+	private void AttachMonoSystems()
+	{
+		AddMonoSystem<UIMonoSystem, IUIMonoSystem>(_uiMonoSystem);
+		AddMonoSystem<AnimationMonoSystem, IAnimationMonoSystem>(_animationMonoSystem);
+		AddMonoSystem<AudioMonoSystem, IAudioMonoSystem>(_audioMonoSystem);
+		AddMonoSystem<GridMonoSystem, IGridMonoSystem>(_gridMonoSystem);
+	}
 
-    private void AddEvents()
-    {
+	private void AddEvents()
+	{
 
-    }
+	}
 
-    public override string GetApplicationName()
-    {
-        return nameof(LJGameManager);
-    }
+	public override string GetApplicationName()
+	{
+		return nameof(LJGameManager);
+	}
 
-    protected override void OnInitalized()
-    {
-        // Ataches all MonoSystems to the GameManager
-        AttachMonoSystems();
+	protected override void OnInitalized()
+	{
+		// Ataches all MonoSystems to the GameManager
+		AttachMonoSystems();
 
-        // Adds Event Listeners
-        AddEvents();
+		// Adds Event Listeners
+		AddEvents();
 
-        // Adds Event Listeners
-        AddListeners();
+		// Adds Event Listeners
+		AddListeners();
 
-        // Ensures all MonoSystems call Awake at the same time.
-        _monoSystemParnet.SetActive(true);
-    }
+		// Ensures all MonoSystems call Awake at the same time.
+		_monoSystemParnet.SetActive(true);
+	}
 
-    private void Awake()
-    {
+	private void Awake()
+	{
 
-    }
+	}
 
-    private void Start()
-    {
+	private void Start()
+	{
 
-    }
+	}
 
-    public override string GetApplicationVersion()
-    {
-        return "Beta V0.0.1";
-    }
+	public override string GetApplicationVersion()
+	{
+		return "Beta V0.0.1";
+	}
 }

@@ -5,8 +5,11 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+	private IGridMonoSystem _gridMs;
+
 	[SerializeField] private Transform _grid;
-	[SerializeField] private float _gridCellSize = 1.0f;
+	[SerializeField] private int _myGridId;
+	private float _gridCellSize;
 	private PlayerInput _input;
 	private Animator _animator;
 
@@ -18,6 +21,8 @@ public class Player : MonoBehaviour
 
 	void Start()
 	{
+		_gridMs = LJGameManager.GetMonoSystem<IGridMonoSystem>();
+		_gridCellSize = _gridMs.CellSize();
 		_input = GetComponent<PlayerInput>();
 		_animator = GetComponent<Animator>();
 
@@ -26,15 +31,35 @@ public class Player : MonoBehaviour
 
 	void FixedUpdate()
 	{
-		if (_moving != Vector2Int.zero && Time.time < _moveStart + _moveSpeed) {
-			transform.Translate((Vector2)_moving * _gridCellSize * Time.deltaTime / _moveSpeed);
-		} else {
-			_moving = Vector2Int.zero;
+		if (_moving != Vector2Int.zero)
+		{
+			if (Time.time < _moveStart + _moveSpeed)
+			{
+				transform.Translate((Vector2)_moving * _gridCellSize * Time.deltaTime / _moveSpeed);
+			}
+			else
+			{
+				Tile next = _gridMs.TileAt(_myGridId, _position + _moving);
+				if (next != null && next.type == TileType.Ice && !next.hasBolder)
+				{
+					_moveStart = Time.time;
+					_position += _moving;
+				}
+				else
+				{
+					_moving = Vector2Int.zero;
+				}
+			}
 		}
 
-		if (_moving == Vector2Int.zero && _inputDirection != Vector2Int.zero) {
-			_moveStart = Time.time;
-			_moving = _inputDirection;
+		if (_moving == Vector2Int.zero && _inputDirection != Vector2Int.zero)
+		{
+			if (_gridMs.IsWalkableAt(_myGridId, _position + _inputDirection))
+			{
+				_moveStart = Time.time;
+				_moving = _inputDirection;
+				_position += _moving;
+			}
 		}
 
 		if (_moving.x > 0) _animator.SetInteger("Move", 4);
