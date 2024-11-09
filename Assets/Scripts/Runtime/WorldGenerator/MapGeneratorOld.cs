@@ -2,22 +2,6 @@ using PlazmaGames.Core.Utils;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public enum TileType
-{
-    Floor,
-    Wall,
-    Hole,
-    Start,
-    End
-}
-
-public enum Direction
-{
-    North,
-    South,
-    West,
-    East
-}
 
 public class MapGeneratorOld : MonoBehaviour
 {
