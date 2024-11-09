@@ -85,7 +85,7 @@ public class Player : MonoBehaviour
 			else
 			{
 				SyncPosition();
-				Tile next = _gridMs.TileAt(_myGridId, _position);
+				Tile next = _gridMs.TileAt(_myGridId, _position + _moving);
 				if (next != null && next.type == TileType.Ice && !next.hasBoulder)
 				{
 					_moveStart = Time.time;
@@ -94,7 +94,7 @@ public class Player : MonoBehaviour
 				else
 				{
 					_moving = Vector2Int.zero;
-					if (next.type == TileType.Water)
+					if (next != null && next.type == TileType.Water)
 					{
 						Death();
 					}
