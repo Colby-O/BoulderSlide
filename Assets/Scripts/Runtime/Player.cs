@@ -26,6 +26,12 @@ public class Player : MonoBehaviour
 	private Transform _boulderPushingTransform;
 	[SerializeField] private float _boulderMoveSpeed = 0.25f;
 
+	public void SetPosition(Vector2Int pos)
+	{
+		_position = pos;
+		SyncPosition();
+	}
+
 	void Start()
 	{
 		_gridMs = LJGameManager.GetMonoSystem<IGridMonoSystem>();
@@ -37,6 +43,11 @@ public class Player : MonoBehaviour
 		_animator = GetComponentInChildren<Animator>();
 
 		_input.actions["Movement"].performed += HandleMovement;
+	}
+
+	private void Death()
+	{
+		SetPosition(new Vector2Int(1, 1));
 	}
 
 	void FixedUpdate()
@@ -51,7 +62,7 @@ public class Player : MonoBehaviour
 			{
 				_isPushingBoulder = false;
 				Tile tile = _gridMs.TileAt(_myGridId, _boulderPushEndPos);
-				if (tile.type == TileType.Hole)
+				if (tile != null && tile.type == TileType.Hole)
 				{
 					Tile fall = _gridMs.TileAt(0, _boulderPushEndPos);
 					tile.hasBoulder = false;
@@ -74,7 +85,7 @@ public class Player : MonoBehaviour
 			else
 			{
 				SyncPosition();
-				Tile next = _gridMs.TileAt(_myGridId, _position + _moving);
+				Tile next = _gridMs.TileAt(_myGridId, _position);
 				if (next != null && next.type == TileType.Ice && !next.hasBoulder)
 				{
 					_moveStart = Time.time;
@@ -83,6 +94,10 @@ public class Player : MonoBehaviour
 				else
 				{
 					_moving = Vector2Int.zero;
+					if (next.type == TileType.Water)
+					{
+						Death();
+					}
 				}
 			}
 		}
@@ -98,6 +113,7 @@ public class Player : MonoBehaviour
 			}
 			else if (
 				_myGridId == 1 &&
+				tile != null &&
 				tile.hasBoulder && (
 					_gridMs.IsWalkableAt(_myGridId, _position + _inputDirection * 2) ||
 					_gridMs.TileAt(_myGridId, _position + _inputDirection * 2).type == TileType.Hole
@@ -135,7 +151,7 @@ public class Player : MonoBehaviour
 	private void SyncPosition()
 	{
 		Vector3 pos = (Vector2)_position * _gridCellSize;
-		pos.z = -1;
+		pos.z = -2.0f;
 		transform.localPosition = pos;
 	}
 }

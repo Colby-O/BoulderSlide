@@ -44,6 +44,7 @@ public class GridMonoSystem : MonoBehaviour, IGridMonoSystem
 			!tile.hasBoulder && (
 				tile.type == TileType.Floor ||
 				tile.type == TileType.Ice ||
+				tile.type == TileType.Water ||
 				tile.type == TileType.Start ||
 				tile.type == TileType.End ||
 				tile.type == TileType.Path

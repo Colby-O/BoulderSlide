@@ -37,7 +37,7 @@ public class MapGenerator
 			for (int y = 0; y < _properties.size.y; y++)
 			{
 				iceGrid[x, y] = new Tile(TileType.Ice);
-				if (_grid[x, y] == TileType.Wall) iceGrid[x, y].type = TileType.Water;
+				if (x == 0 || y == 0 || x == _properties.size.x - 1 || y == _properties.size.y - 1) iceGrid[x, y].type = TileType.Water;
 
 
 				stoneGrid[x, y] = new Tile(TileType.Floor);
@@ -199,20 +199,20 @@ public class MapGenerator
 	}
 
 	private void PlaceHold(Vector2Int loc, ref Vector2Int cur, Direction dir)
-    {
+	{
 		bool hasPlaced = false;
 
-        do {
+		do {
 			if (!HasSurroundingHole(loc))
 			{
 				_grid[loc.x, loc.y] = TileType.Hole;
 				hasPlaced = true;
-            }
+			}
 			else
 			{
 				loc = GetLastTile(loc, dir);
 				cur = GetLastTile(loc, dir);
-            }
+			}
 
 		} while (!hasPlaced);
 	}
@@ -258,12 +258,12 @@ public class MapGenerator
 				if (_grid[GetNextTile(cur, curDir).x, GetNextTile(cur, curDir).y] == TileType.End)
 				{
 					cur = GetLastTile(cur, curDir);
-                    PlaceHold(GetNextTile(cur, curDir), ref cur, curDir);
-                }
+					PlaceHold(GetNextTile(cur, curDir), ref cur, curDir);
+				}
 				else
 				{
 					PlaceHold(GetNextTile(cur, curDir), ref cur, curDir);
-                }
+				}
 				numberOfMoves = 0;
 				curDir = GetDirection(cur, curDir);
 			}
@@ -322,23 +322,23 @@ public class MapGenerator
 
 	private void PlacePath(Vector2Int loc)
 	{
-        PathFinder pf = new PathFinder(_grid);
+		PathFinder pf = new PathFinder(_grid);
 
-        Dictionary<Vector2Int, Vector2Int> cameFrom = pf.FindOptimalPath(
-            new Vector2Int(Mathf.FloorToInt(_properties.size.x / 2f), Mathf.FloorToInt(_properties.size.y / 2f)),
-            loc
-        );
+		Dictionary<Vector2Int, Vector2Int> cameFrom = pf.FindOptimalPath(
+			new Vector2Int(Mathf.FloorToInt(_properties.size.x / 2f), Mathf.FloorToInt(_properties.size.y / 2f)),
+			loc
+		);
 
-        _grid[Mathf.FloorToInt(_properties.size.x / 2f), Mathf.FloorToInt(_properties.size.y / 2f)] = TileType.Floor;
+		_grid[Mathf.FloorToInt(_properties.size.x / 2f), Mathf.FloorToInt(_properties.size.y / 2f)] = TileType.Floor;
 
-        Vector2Int gridPT = loc;
-        while (true)
-        {
+		Vector2Int gridPT = loc;
+		while (true)
+		{
 			if (_grid[gridPT.x, gridPT.y] == TileType.None) _grid[gridPT.x, gridPT.y] = TileType.Floor;
-            if (!cameFrom.ContainsKey(gridPT)) break;
-            else gridPT = cameFrom[gridPT];
-        }
-    }
+			if (!cameFrom.ContainsKey(gridPT)) break;
+			else gridPT = cameFrom[gridPT];
+		}
+	}
 
 	private void GenerateBoulders()
 	{
@@ -353,16 +353,16 @@ public class MapGenerator
 			}
 		}
 
-        for (int i = 0; i < _grid.GetLength(0); i++)
-        {
-            for (int j = 0; j < _grid.GetLength(1); j++)
-            {
-                if (_grid[i, j] == TileType.Push)
-                {
-                    PlacePath(new Vector2Int(i, j));
-                }
-            }
-        }
+		for (int i = 0; i < _grid.GetLength(0); i++)
+		{
+			for (int j = 0; j < _grid.GetLength(1); j++)
+			{
+				if (_grid[i, j] == TileType.Push)
+				{
+					PlacePath(new Vector2Int(i, j));
+				}
+			}
+		}
 
 		for (int i = 0; i < _grid.GetLength(0); i++)
 		{
