@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   size: {x: 12, y: 12}
   minNumBoulders: 6
-  turnProb: 0.1
-  boulderMoveProb: 0.1
+  turnProb: 0.05
+  boulderMoveProb: 0.95
   wall: {fileID: 11400000, guid: cc5671be968c5f74283e5e24e3b1b601, type: 2}
   water: {fileID: 11400000, guid: e4d31d07b2f36eee185f312e6cf1f479, type: 2}
   floor: {fileID: 11400000, guid: db590d335dc24e54681cc2982c2b69fd, type: 2}

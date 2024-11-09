@@ -309,7 +309,10 @@ MonoBehaviour:
   _musicSound: 1
   _musicSounds: []
   _ambientSounds: []
-  _sfxSounds: []
+  _sfxSounds:
+  - id: 0
+    name: ButtonClick
+    audio: {fileID: 8300000, guid: c17cf3a2a6099504083aff77d307a989, type: 3}
   _musicSource: {fileID: 180716304485011201}
   _ambientSource: {fileID: 3116640164650367139}
   _sfxMainSource: {fileID: 5184420218532803718}
@@ -445,7 +448,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d9da330e6435104dbd42dda19171608, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _startingView: 
+  _startingView: MainMenuView, Assembly-CSharp
   _views: []
   _currentView: {fileID: 0}
 --- !u!1 &4703103342301113934

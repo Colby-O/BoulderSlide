@@ -1,7 +1,10 @@
+using PlazmaGames.Core;
 using PlazmaGames.Core.Utils;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using static UnityEditor.PlayerSettings;
 
 public enum Direction
 {
@@ -189,7 +192,30 @@ public class MapGenerator
 
 		return true;
 	}
+	
+	private bool HasSurroundingHole(Vector2Int pos)
+	{
+		return _grid[pos.x + 1, pos.y] == TileType.Hole || _grid[pos.x - 1, pos.y] == TileType.Hole || _grid[pos.x, pos.y + 1] == TileType.Hole || _grid[pos.x, pos.y - 1] == TileType.Hole;
+	}
 
+	private void PlaceHold(Vector2Int loc, ref Vector2Int cur, Direction dir)
+    {
+		bool hasPlaced = false;
+
+        do {
+			if (!HasSurroundingHole(loc))
+			{
+				_grid[loc.x, loc.y] = TileType.Hole;
+				hasPlaced = true;
+            }
+			else
+			{
+				loc = GetLastTile(loc, dir);
+				cur = GetLastTile(loc, dir);
+            }
+
+		} while (!hasPlaced);
+	}
 	private void GenerateLayout()
 	{
 		_grid = ArrayUtilities.CreateAndFill(_properties.size.x, _properties.size.y, TileType.None);
@@ -231,13 +257,13 @@ public class MapGenerator
 				holesPlaced++;
 				if (_grid[GetNextTile(cur, curDir).x, GetNextTile(cur, curDir).y] == TileType.End)
 				{
-					_grid[cur.x, cur.y] = TileType.Hole;
 					cur = GetLastTile(cur, curDir);
-				}
+                    PlaceHold(GetNextTile(cur, curDir), ref cur, curDir);
+                }
 				else
 				{
-					_grid[GetNextTile(cur, curDir).x, GetNextTile(cur, curDir).y] = TileType.Hole;
-				}
+					PlaceHold(GetNextTile(cur, curDir), ref cur, curDir);
+                }
 				numberOfMoves = 0;
 				curDir = GetDirection(cur, curDir);
 			}
@@ -285,7 +311,7 @@ public class MapGenerator
 			loc = move;
 			dir = GetDirection(loc, out move, out move2);
 
-		} while (Random.value > _properties.boulderMoveProb);
+		} while (Random.value > 1 - _properties.boulderMoveProb);
 
 		if (dir != Direction.None) _grid[move2.x, move2.y] = TileType.Push;
 
@@ -293,6 +319,26 @@ public class MapGenerator
 
 		if (!(_grid[orig.x, orig.y] == t)) Debug.Log(_grid[orig.x, orig.y]);
 	}
+
+	private void PlacePath(Vector2Int loc)
+	{
+        PathFinder pf = new PathFinder(_grid);
+
+        Dictionary<Vector2Int, Vector2Int> cameFrom = pf.FindOptimalPath(
+            new Vector2Int(Mathf.FloorToInt(_properties.size.x / 2f), Mathf.FloorToInt(_properties.size.y / 2f)),
+            loc
+        );
+
+        _grid[Mathf.FloorToInt(_properties.size.x / 2f), Mathf.FloorToInt(_properties.size.y / 2f)] = TileType.Floor;
+
+        Vector2Int gridPT = loc;
+        while (true)
+        {
+			if (_grid[gridPT.x, gridPT.y] == TileType.None) _grid[gridPT.x, gridPT.y] = TileType.Floor;
+            if (!cameFrom.ContainsKey(gridPT)) break;
+            else gridPT = cameFrom[gridPT];
+        }
+    }
 
 	private void GenerateBoulders()
 	{
@@ -303,6 +349,28 @@ public class MapGenerator
 				if (_grid[i, j] == TileType.Hole)
 				{
 					PlaceBoulders(new Vector2Int(i, j));
+				}
+			}
+		}
+
+        for (int i = 0; i < _grid.GetLength(0); i++)
+        {
+            for (int j = 0; j < _grid.GetLength(1); j++)
+            {
+                if (_grid[i, j] == TileType.Push)
+                {
+                    PlacePath(new Vector2Int(i, j));
+                }
+            }
+        }
+
+		for (int i = 0; i < _grid.GetLength(0); i++)
+		{
+			for (int j = 0; j < _grid.GetLength(1); j++)
+			{
+				if (_grid[i, j] == TileType.None)
+				{
+					_grid[i, j] = TileType.Wall;
 				}
 			}
 		}
