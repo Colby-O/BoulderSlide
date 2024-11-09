@@ -84,6 +84,11 @@ public class GridMonoSystem : MonoBehaviour, IGridMonoSystem
 
 	}
 
+	public Transform GridTransform(int id)
+	{
+		return TilemapById(id).transform;
+	}
+
 	private bool InBounds(Tile[,] grid, Vector2Int pos)
 	{
 		return (

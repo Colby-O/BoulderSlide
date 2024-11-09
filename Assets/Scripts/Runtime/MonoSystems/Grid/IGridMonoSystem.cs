@@ -9,4 +9,5 @@ public interface IGridMonoSystem : IMonoSystem
 	public Tile TileAt(int id, Vector2Int pos);
 	public bool IsWalkableAt(int id, Vector2Int pos);
 	public void Spawn();
+	public Transform GridTransform(int id);
 }
