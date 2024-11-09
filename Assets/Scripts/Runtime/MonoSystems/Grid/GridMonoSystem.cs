@@ -18,16 +18,45 @@ public class GridMonoSystem : MonoBehaviour, IGridMonoSystem
 	private Tile[,] _iceGrid = new Tile[1,1];
 	private Tile[,] _stoneGrid = new Tile[1,1];
 
-	void Start()
+	private MapGenerator _generator;
+	private List<GameObject> _boulders;
+
+
+
+    void Start()
 	{
 		_iceTilemap = GameObject.FindWithTag("IceTilemap").GetComponent<Tilemap>();
 		_stoneTilemap = GameObject.FindWithTag("StoneTilemap").GetComponent<Tilemap>();
 		_boulderPrefab = Resources.Load<GameObject>("Prefabs/boulder");
-		(_iceGrid, _stoneGrid) = new MapGenerator(_properties).collect();
+        _boulders = new List<GameObject>();
+        _generator = new MapGenerator(_properties);
+        (_iceGrid, _stoneGrid) = _generator.Collect();
 		Spawn();
 	}
 
-	public float CellSize() => _cellSize;
+    public void SetTileAt(int id, Vector2Int pos, TileType type)
+	{
+		GridById(id)[pos.x, pos.y].type = type;
+
+        TileBase tile = _properties.floor;
+        if (type == TileType.Floor) tile = _properties.floor;
+        else if (type == TileType.Hole) tile = _properties.hole;
+        else if (type == TileType.Wall) tile = _properties.wall;
+        else if (type == TileType.Ice) tile = _properties.ice;
+        else if (type == TileType.Water) tile = _properties.water;
+        else if (type == TileType.End) tile = _properties.end;
+        else if (type == TileType.HoleFilled) tile = _properties.holeFilled;
+
+        GetTilemap(id).SetTile(new Vector3Int(pos.x, pos.y, 0), tile);
+    }
+
+    public Tilemap GetTilemap(int id)
+	{
+		if (id == 0) return _stoneTilemap;
+		else return _iceTilemap;
+	}
+
+    public float CellSize() => _cellSize;
 
 	public Tile TileAt(int id, Vector2Int pos)
 	{
@@ -63,12 +92,14 @@ public class GridMonoSystem : MonoBehaviour, IGridMonoSystem
 				for (int y = 0; y < grid.GetLength(1); y++)
 				{
 					TileBase tile = _properties.floor;
-					if (grid[x, y].type == TileType.Floor) tile = _properties.floor;
+                    if (grid[x, y].type == TileType.Floor) tile = _properties.floor;
 					else if (grid[x, y].type == TileType.Hole) tile = _properties.hole;
 					else if (grid[x, y].type == TileType.Wall) tile = _properties.wall;
 					else if (grid[x, y].type == TileType.Ice) tile = _properties.ice;
 					else if (grid[x, y].type == TileType.Water) tile = _properties.water;
-					tilemap.SetTile(new Vector3Int(x, y, 0), tile);
+                    else if (grid[x, y].type == TileType.End) tile = _properties.end;
+                    else if (grid[x, y].type == TileType.HoleFilled) tile = _properties.holeFilled;
+                    tilemap.SetTile(new Vector3Int(x, y, 0), tile);
 
 					if (grid[x, y].hasBoulder)
 					{
@@ -78,14 +109,33 @@ public class GridMonoSystem : MonoBehaviour, IGridMonoSystem
 							x * _cellSize, y * _cellSize, -1
 						);
 						grid[x, y].boulderGameObject = boulder;
-					}
+                        _boulders.Add(boulder);
+
+                    }
 				}
 			}
 		}
-
 	}
 
-	public Transform GridTransform(int id)
+    public void NewGrid(int numHoles)
+    {
+		_properties.minNumBoulders = numHoles;
+        foreach (GameObject go in _boulders) Destroy(go);
+        _boulders.Clear();
+        _generator = new MapGenerator(_properties);
+        (_iceGrid, _stoneGrid) = _generator.Collect();
+        Spawn();
+    }
+
+    public void ResetGrid()
+	{
+		foreach (GameObject go in _boulders) Destroy(go);
+		_boulders.Clear();
+        (_iceGrid, _stoneGrid) = _generator.Collect();
+        Spawn();
+    }
+
+    public Transform GridTransform(int id)
 	{
 		return TilemapById(id).transform;
 	}

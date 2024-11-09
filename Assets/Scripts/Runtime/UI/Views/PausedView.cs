@@ -13,6 +13,7 @@ public class PausedView : View
     [SerializeField] private Button _resume;
     [SerializeField] private Button _settings;
     [SerializeField] private Button _exit;
+    [SerializeField] private Button _help;
 
     private void Resume()
     {
@@ -26,7 +27,16 @@ public class PausedView : View
 
     private void Exit()
     {
+        if (LJGameManager.highscore < LJGameManager.numberCompletedInRow)
+        {
+            LJGameManager.highscore = LJGameManager.numberCompletedInRow;
+        }
         Application.Quit();
+    }
+
+    private void Help()
+    {
+        GameManager.GetMonoSystem<IUIMonoSystem>().Show<ControlView>();
     }
 
     public override void Init()
@@ -34,6 +44,7 @@ public class PausedView : View
         _resume.onClick.AddListener(Resume);
         _settings.onClick.AddListener(Settings);
         _exit.onClick.AddListener(Exit);
+        _help.onClick.AddListener(Help);
     }
 
     private void Update()

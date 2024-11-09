@@ -1,10 +1,7 @@
 using PlazmaGames.Core;
 using PlazmaGames.Core.Utils;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Tilemaps;
-using static UnityEditor.PlayerSettings;
 
 public enum Direction
 {
@@ -20,6 +17,9 @@ public class MapGenerator
 	private GenerationProperties _properties;
 	private TileType[,] _grid;
 
+	private Vector2Int _start;
+	private Vector2Int _end;
+
 	public MapGenerator(GenerationProperties props)
 	{
 		_properties = props;
@@ -27,7 +27,7 @@ public class MapGenerator
 		GenerateBoulders();
 	}
 
-	public (Tile[,], Tile[,]) collect()
+	public (Tile[,], Tile[,]) Collect()
 	{
 		Tile[,] iceGrid = new Tile[_properties.size.x, _properties.size.y];
 		Tile[,] stoneGrid = new Tile[_properties.size.x, _properties.size.y];
@@ -45,7 +45,12 @@ public class MapGenerator
 				{
 					stoneGrid[x, y].hasBoulder = true;
 				}
-				else if (
+				else if (_grid[x, y] == TileType.End)
+				{
+					stoneGrid[x, y].type = TileType.Wall;
+					iceGrid[x, y].type = TileType.End;
+                }
+                else if (
 					_grid[x, y] == TileType.Hole ||
 					_grid[x, y] == TileType.Wall
 				) {
@@ -231,21 +236,21 @@ public class MapGenerator
 			}
 		}
 
-		Vector2Int start = new Vector2Int(1, 0);
+		_start = new Vector2Int(1, 1);
 		float rand = Random.value;
-		Vector2Int end = new Vector2Int(
+		_end = new Vector2Int(
 			(rand >= 0.5f) ? _grid.GetLength(0) - 3 : _grid.GetLength(0) - 1,
 			(rand >= 0.5f) ? _grid.GetLength(1) - 1 : _grid.GetLength(1) - 3
 		);
 
-		_grid[start.x, start.y] = TileType.Start;
-		_grid[end.x, end.y] = TileType.End;
+		_grid[_start.x, _start.y] = TileType.Start;
+		_grid[_end.x, _end.y] = TileType.End;
 
-		Vector2Int cur = start;
-		Direction curDir = GetDirection(start, null);
+		Vector2Int cur = _start;
+		Direction curDir = GetDirection(_start, null);
 		int holesPlaced = 0;
 		int numberOfMoves = 0;
-		while (holesPlaced < _properties.minNumBoulders && cur != end)
+		while (holesPlaced < _properties.minNumBoulders && cur != _end)
 		{
 			if ((Random.value < 1 - _properties.turnProb || numberOfMoves <= 2) && CanMove(cur, curDir))
 			{
@@ -269,19 +274,19 @@ public class MapGenerator
 			}
 		}
 
-		if (cur != end)
+		if (cur != _end)
 		{
-			if (cur.y != end.y && end.y != _properties.size.y - 1)
+			if (cur.y != _end.y && _end.y != _properties.size.y - 1)
 			{
-				int moves = -(cur.y - end.y);
+				int moves = -(cur.y - _end.y);
 
 				cur += new Vector2Int(0, moves);
 				curDir = (moves > 0) ? Direction.North : Direction.South;
 				_grid[GetNextTile(cur, curDir).x, GetNextTile(cur, curDir).y] = TileType.Hole;
 			}
-			else if (cur.x != end.x && end.x != _properties.size.x - 1)
+			else if (cur.x != _end.x && _end.x != _properties.size.x - 1)
 			{
-				int moves = -(cur.x - end.x);
+				int moves = -(cur.x - _end.x);
 
 				cur += new Vector2Int(moves, 0);
 				curDir = (moves > 0) ? Direction.East : Direction.West;
@@ -325,13 +330,15 @@ public class MapGenerator
 		PathFinder pf = new PathFinder(_grid);
 
 		Dictionary<Vector2Int, Vector2Int> cameFrom = pf.FindOptimalPath(
-			new Vector2Int(Mathf.FloorToInt(_properties.size.x / 2f), Mathf.FloorToInt(_properties.size.y / 2f)),
-			loc
+            //new Vector2Int(Mathf.FloorToInt(_properties.size.x / 2f), Mathf.FloorToInt(_properties.size.y / 2f)),
+            _start,
+            loc
 		);
 
-		_grid[Mathf.FloorToInt(_properties.size.x / 2f), Mathf.FloorToInt(_properties.size.y / 2f)] = TileType.Floor;
+        //_grid[Mathf.FloorToInt(_properties.size.x / 2f), Mathf.FloorToInt(_properties.size.y / 2f)] = TileType.Floor;
+        _grid[_start.x, _start.y] = TileType.Floor;
 
-		Vector2Int gridPT = loc;
+        Vector2Int gridPT = loc;
 		while (true)
 		{
 			if (_grid[gridPT.x, gridPT.y] == TileType.None) _grid[gridPT.x, gridPT.y] = TileType.Floor;

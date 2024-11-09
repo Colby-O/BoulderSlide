@@ -307,12 +307,39 @@ MonoBehaviour:
   _ambientSound: 1
   _sfxSound: 1
   _musicSound: 1
-  _musicSounds: []
+  _musicSounds:
+  - id: 0
+    name: Menu
+    audio: {fileID: 8300000, guid: 6f5ccccfe7334f74daed6128d12d61c6, type: 3}
+  - id: 1
+    name: Game
+    audio: {fileID: 8300000, guid: 3ee37541c0c09de498fc52f32ceeb098, type: 3}
   _ambientSounds: []
   _sfxSounds:
   - id: 0
     name: ButtonClick
     audio: {fileID: 8300000, guid: c17cf3a2a6099504083aff77d307a989, type: 3}
+  - id: 1
+    name: RockDrop
+    audio: {fileID: 8300000, guid: 091e77edd20925b4d994d6b422c336d6, type: 3}
+  - id: 2
+    name: RockMove
+    audio: {fileID: 8300000, guid: 3685dfd01de91fb46bef1d54c5965743, type: 3}
+  - id: 3
+    name: RockHit
+    audio: {fileID: 8300000, guid: c4ab68e9534f4ce4fb153da498c75882, type: 3}
+  - id: 4
+    name: Splash
+    audio: {fileID: 8300000, guid: 240b135a5bee24b4ea33e8d032d6b6a6, type: 3}
+  - id: 5
+    name: Win
+    audio: {fileID: 8300000, guid: 75a7a4ee29e730d45a93a0c46ebfa9e9, type: 3}
+  - id: 6
+    name: Restart
+    audio: {fileID: 8300000, guid: c8442eb1e8259d64ea4cd100a2fd4fc6, type: 3}
+  - id: 7
+    name: Beep
+    audio: {fileID: 8300000, guid: b2e4ee2f942fa54498f744b48fd73420, type: 3}
   _musicSource: {fileID: 180716304485011201}
   _ambientSource: {fileID: 3116640164650367139}
   _sfxMainSource: {fileID: 5184420218532803718}
@@ -369,6 +396,55 @@ MonoBehaviour:
   _animationMonoSystem: {fileID: 4046045048285038327}
   _audioMonoSystem: {fileID: 8391724736766468402}
   _gridMonoSystem: {fileID: 7046530781431335258}
+  _dataMonoSystem: {fileID: 1805425740940583805}
+--- !u!1 &1702322636835435031
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1026113685102665822}
+  - component: {fileID: 1805425740940583805}
+  m_Layer: 0
+  m_Name: DataPresistanceMonoSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1026113685102665822
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1702322636835435031}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 566492175010620579}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1805425740940583805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1702322636835435031}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9017504bf598c549841da97d98d3df0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _filename: Save
+  _createNewGameIfNull: 1
+  _useEncryption: 1
+  _currentProfileName: User
 --- !u!1 &3553439598254139157
 GameObject:
   m_ObjectHideFlags: 0
@@ -402,6 +478,7 @@ Transform:
   - {fileID: 1029697400000144859}
   - {fileID: 6896512061378848349}
   - {fileID: 6894773860057599719}
+  - {fileID: 1026113685102665822}
   m_Father: {fileID: 4933031515734017215}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4545016772727590242
@@ -539,11 +616,11 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 3ee37541c0c09de498fc52f32ceeb098, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0

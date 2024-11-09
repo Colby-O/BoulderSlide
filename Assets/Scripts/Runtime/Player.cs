@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine;
+using PlazmaGames.Core;
+using PlazmaGames.Audio;
 
 public class Player : MonoBehaviour
 {
@@ -9,7 +11,9 @@ public class Player : MonoBehaviour
 
 	[SerializeField] private Transform _gridTransform;
 	[SerializeField] private int _myGridId;
-	private float _gridCellSize;
+    [SerializeField] private AudioSource _audio;
+    [SerializeField] private Player _other;
+    private float _gridCellSize;
 	private PlayerInput _input;
 	private Animator _animator;
 
@@ -34,7 +38,7 @@ public class Player : MonoBehaviour
 
 	void Start()
 	{
-		_gridMs = LJGameManager.GetMonoSystem<IGridMonoSystem>();
+		_gridMs = GameManager.GetMonoSystem<IGridMonoSystem>();
 		_gridCellSize = _gridMs.CellSize();
 		_gridTransform = _gridMs.GridTransform(_myGridId);
 		transform.parent = _gridTransform;
@@ -45,10 +49,24 @@ public class Player : MonoBehaviour
 		_input.actions["Movement"].performed += HandleMovement;
 	}
 
-	private void Death()
+	private void Finish()
 	{
-		SetPosition(new Vector2Int(1, 1));
-	}
+        GameManager.GetMonoSystem<IAudioMonoSystem>().PlayAudio("Win", PlazmaGames.Audio.AudioType.Sfx, false, true);
+        LJGameManager.numberCompletedInRow++;
+        _moving = Vector2Int.zero;
+		LJGameManager.numOfHoles = Mathf.Min(LJGameManager.numOfHoles + 1, LJGameManager.maxNumOfHoles);
+        _gridMs.NewGrid(LJGameManager.numOfHoles);
+        SetPosition(new Vector2Int(1, 1));
+        _other.SetPosition(new Vector2Int(1, 1));
+    }
+
+    private void Death()
+	{
+		_moving = Vector2Int.zero;
+        _gridMs.ResetGrid();
+        SetPosition(new Vector2Int(1, 1));
+        _other.SetPosition(new Vector2Int(1, 1));
+    }
 
 	void FixedUpdate()
 	{
@@ -56,18 +74,20 @@ public class Player : MonoBehaviour
 		{
 			if (Time.time < _boulderPushStart + _boulderMoveSpeed)
 			{
-				_boulderPushingTransform.Translate((Vector2)_boulderPushDirection * _gridCellSize * Time.deltaTime / _boulderMoveSpeed);
+                _boulderPushingTransform.Translate((Vector2)_boulderPushDirection * _gridCellSize * Time.deltaTime / _boulderMoveSpeed);
 			}
 			else
 			{
-				_isPushingBoulder = false;
+                _isPushingBoulder = false;
 				Tile tile = _gridMs.TileAt(_myGridId, _boulderPushEndPos);
 				if (tile != null && tile.type == TileType.Hole)
 				{
-					Tile fall = _gridMs.TileAt(0, _boulderPushEndPos);
+                    GameManager.GetMonoSystem<IAudioMonoSystem>().PlayAudio("RockDrop", PlazmaGames.Audio.AudioType.Sfx, false, true);
+                    Tile fall = _gridMs.TileAt(0, _boulderPushEndPos);
 					tile.hasBoulder = false;
 					fall.hasBoulder = true;
-					fall.boulderGameObject = tile.boulderGameObject;
+					_gridMs.SetTileAt(0, _boulderPushEndPos, TileType.HoleFilled);
+                    fall.boulderGameObject = tile.boulderGameObject;
 					_boulderPushingTransform.parent = _gridMs.GridTransform(0);
 				}
 
@@ -93,11 +113,20 @@ public class Player : MonoBehaviour
 				}
 				else
 				{
-					_moving = Vector2Int.zero;
+                    _moving = Vector2Int.zero;
 					if (next != null && next.type == TileType.Water)
 					{
-						Death();
+                        if (_myGridId == 0) GameManager.GetMonoSystem<IAudioMonoSystem>().PlayAudio("Splash", PlazmaGames.Audio.AudioType.Sfx, false, true);
+                        Death();
 					}
+					else if (next != null && next.type == TileType.End)
+					{
+						Finish();
+					}
+					else
+					{
+                        if (_myGridId == 0) GameManager.GetMonoSystem<IAudioMonoSystem>().PlayAudio("RockHit", PlazmaGames.Audio.AudioType.Sfx, false, true);
+                    }
 				}
 			}
 		}
@@ -120,7 +149,8 @@ public class Player : MonoBehaviour
 				)
 			)
 			{
-				_isPushingBoulder = true;
+                if (_gridMs.TileAt(_myGridId, _position + _inputDirection * 2).type != TileType.Hole) GameManager.GetMonoSystem<IAudioMonoSystem>().PlayAudio("RockMove", PlazmaGames.Audio.AudioType.Sfx, false, true);
+                _isPushingBoulder = true;
 				_boulderPushDirection = _inputDirection;
 				_boulderPushEndPos = _position + _inputDirection * 2;
 				_boulderPushingTransform = tile.boulderGameObject.transform;
@@ -133,7 +163,10 @@ public class Player : MonoBehaviour
 			}
 		}
 
-		if (_moving.x > 0) _animator.SetInteger("Move", 4);
+		if (_moving.magnitude < 0.01f) _audio.Stop();
+		else if (!_audio.isPlaying) _audio.Play();
+
+        if (_moving.x > 0) _animator.SetInteger("Move", 4);
 		else if (_moving.x < 0) _animator.SetInteger("Move", 3);
 		else if (_moving.y > 0) _animator.SetInteger("Move", 2);
 		else if (_moving.y < 0) _animator.SetInteger("Move", 1);
@@ -154,4 +187,13 @@ public class Player : MonoBehaviour
 		pos.z = -2.0f;
 		transform.localPosition = pos;
 	}
+
+    private void Update()
+    {
+		if (_myGridId == 0 && Keyboard.current[Key.R].wasPressedThisFrame)
+		{
+            GameManager.GetMonoSystem<IAudioMonoSystem>().PlayAudio("Restart", PlazmaGames.Audio.AudioType.Sfx, false, true);
+            Death();
+		}
+    }
 }

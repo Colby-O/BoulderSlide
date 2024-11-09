@@ -43,6 +43,11 @@ public class SettingsView : View
         _sfx.onValueChanged.AddListener(SfX);
         _music.onValueChanged.AddListener(Music);
 
+        GameManager.GetMonoSystem<IAudioMonoSystem>().SetOverallVolume(1f);
+        GameManager.GetMonoSystem<IAudioMonoSystem>().SetMusicVolume(0.08f);
+        GameManager.GetMonoSystem<IAudioMonoSystem>().SetSfXVolume(0.5f);
+        GameManager.GetMonoSystem<IAudioMonoSystem>().SetAmbientVolume(0.5f);
+
         _overall.value = GameManager.GetMonoSystem<IAudioMonoSystem>().GetOverallVolume();
         _music.value = GameManager.GetMonoSystem<IAudioMonoSystem>().GetMusicVolume();
         _sfx.value = GameManager.GetMonoSystem<IAudioMonoSystem>().GetSfXVolume();

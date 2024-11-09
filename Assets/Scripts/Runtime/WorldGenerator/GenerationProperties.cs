@@ -18,5 +18,7 @@ public class GenerationProperties : ScriptableObject
 	public TileBase floor;
 	public TileBase hole;
 	public TileBase ice;
-	public TileBase test;
+    public TileBase end;
+	public TileBase holeFilled;
+    public TileBase test;
 }

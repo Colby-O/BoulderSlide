@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7df1d35882fec2a489159e4d3e9e2b23, type: 3}
   m_Name: GenerationProperties
   m_EditorClassIdentifier: 
-  size: {x: 12, y: 12}
-  minNumBoulders: 6
+  size: {x: 20, y: 20}
+  minNumBoulders: 4
   turnProb: 0.05
   boulderMoveProb: 0.95
   wall: {fileID: 11400000, guid: cc5671be968c5f74283e5e24e3b1b601, type: 2}
@@ -21,4 +21,6 @@ MonoBehaviour:
   floor: {fileID: 11400000, guid: db590d335dc24e54681cc2982c2b69fd, type: 2}
   hole: {fileID: 11400000, guid: 37b569e4fee598e44abbf75293d9d697, type: 2}
   ice: {fileID: 11400000, guid: 932e0a6ce77c746ea92f4128b576e1db, type: 2}
+  end: {fileID: 11400000, guid: ca2e9e0ea32c8814abf592cb4cf5d186, type: 2}
+  holeFilled: {fileID: 11400000, guid: bcdbe2661a1a6ec4583d072002240242, type: 2}
   test: {fileID: 11400000, guid: 205aed2095f4861498341afba3feb016, type: 2}

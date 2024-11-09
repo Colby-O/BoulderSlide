@@ -14,7 +14,8 @@ public enum TileType
 	Floor,
 	Path,
 	Push,
-	Boulder
+	Boulder,
+	HoleFilled
 }
 
 public class Tile
