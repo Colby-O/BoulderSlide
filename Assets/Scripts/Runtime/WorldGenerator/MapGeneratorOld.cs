@@ -88,7 +88,7 @@ public class MapGeneratorOld : MonoBehaviour
             {
                 TileBase tile = _properties.floor;
 
-                if (_grid[i, j] == TileType.Floor) tile = _properties.floor;
+                if (_grid[i, j] == TileType.None) tile = _properties.floor;
                 else if (_grid[i, j] == TileType.Hole) tile = _properties.hole;
                 else if (_grid[i, j] == TileType.Wall) tile = _properties.wall;
 
@@ -99,7 +99,7 @@ public class MapGeneratorOld : MonoBehaviour
 
     private void GenerateLayout()
     {
-        _grid = ArrayUtilities.CreateAndFill(_properties.size.x, _properties.size.y, TileType.Floor);
+        _grid = ArrayUtilities.CreateAndFill(_properties.size.x, _properties.size.y, TileType.None);
 
         for (int i = 0; i < _grid.GetLength(0); i++)
         {
@@ -120,8 +120,8 @@ public class MapGeneratorOld : MonoBehaviour
         );
 
 
-        _grid[start.x, start.y] = TileType.Floor;
-        _grid[end.x, end.y] = TileType.Floor;
+        _grid[start.x, start.y] = TileType.None;
+        _grid[end.x, end.y] = TileType.None;
 
         int bolders = 0;
         Vector2Int cur = start;

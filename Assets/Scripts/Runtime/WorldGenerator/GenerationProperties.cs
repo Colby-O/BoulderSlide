@@ -10,9 +10,11 @@ public class GenerationProperties : ScriptableObject
     public Vector2Int size;
     public int minNumBoulders;
     public float turnProb;
+    public float boulderMoveProb;
 
     [Header("Sprites")]
     public TileBase wall;
     public TileBase floor;
     public TileBase hole;
+    public TileBase test;
 }

@@ -15,6 +15,8 @@ MonoBehaviour:
   size: {x: 20, y: 20}
   minNumBoulders: 6
   turnProb: 0.1
+  boulderMoveProb: 0.1
   wall: {fileID: 11400000, guid: cc5671be968c5f74283e5e24e3b1b601, type: 2}
   floor: {fileID: 11400000, guid: db590d335dc24e54681cc2982c2b69fd, type: 2}
   hole: {fileID: 11400000, guid: 37b569e4fee598e44abbf75293d9d697, type: 2}
+  test: {fileID: 11400000, guid: 205aed2095f4861498341afba3feb016, type: 2}
