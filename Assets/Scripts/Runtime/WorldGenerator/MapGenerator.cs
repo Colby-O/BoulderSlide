@@ -1,5 +1,5 @@
 using PlazmaGames.Core.Utils;
-using PlazmaGames.Core;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -8,31 +8,50 @@ public enum Direction
 	North,
 	South,
 	West,
-	East
+	East,
+	None
 }
 
-public class MapGenerator : MonoBehaviour
+public class MapGenerator
 {
-	[SerializeField] private Tilemap _tilemap;
-	[SerializeField] private GenerationProperties _properties;
-
+	private GenerationProperties _properties;
 	private TileType[,] _grid;
 
-	private void PlaceTiles()
+	public MapGenerator(GenerationProperties props)
 	{
-		for (int i = 0; i < _grid.GetLength(0); i++)
+		_properties = props;
+		GenerateLayout();
+		GenerateBoulders();
+	}
+
+	public (Tile[,], Tile[,]) collect()
+	{
+		Tile[,] iceGrid = new Tile[_properties.size.x, _properties.size.y];
+		Tile[,] stoneGrid = new Tile[_properties.size.x, _properties.size.y];
+
+		for (int x = 0; x < _properties.size.x; x++)
 		{
-			for (int j = 0; j < _grid.GetLength(1); j++)
+			for (int y = 0; y < _properties.size.y; y++)
 			{
-				TileBase tile = _properties.floor;
+				iceGrid[x, y] = new Tile(TileType.Ice);
+				if (_grid[x, y] == TileType.Wall) iceGrid[x, y].type = TileType.Water;
 
-				if (_grid[i, j] == TileType.Floor) tile = _properties.floor;
-				else if (_grid[i, j] == TileType.Hole) tile = _properties.hole;
-				else if (_grid[i, j] == TileType.Wall) tile = _properties.wall;
 
-				_tilemap.SetTile(new Vector3Int(i, j, 0), tile);
+				stoneGrid[x, y] = new Tile(TileType.Floor);
+				if (_grid[x, y] == TileType.Boulder)
+				{
+					stoneGrid[x, y].hasBoulder = true;
+				}
+				else if (
+					_grid[x, y] == TileType.Hole ||
+					_grid[x, y] == TileType.Wall
+				) {
+					stoneGrid[x, y].type = _grid[x, y];
+				}
 			}
 		}
+
+		return (iceGrid, stoneGrid);
 	}
 
 	private Vector2Int GetNextTile(Vector2Int cur, Direction dir)
@@ -79,8 +98,13 @@ public class MapGenerator : MonoBehaviour
 	{
 		int dir = -1;
 
+		int maxTries = 100;
+		int numTries = 0;
+
 		while (dir < 0)
 		{
+			numTries++;
+
 			dir = Random.Range(0, 4);
 
 			Vector2Int next = GetNextTile(cur, (Direction)dir);
@@ -92,15 +116,56 @@ public class MapGenerator : MonoBehaviour
 				next2.y < 0 ||
 				next2.x >= _properties.size.x ||
 				next2.y >= _properties.size.y ||
-				_grid[next.x, next.y] == TileType.Wall || 
-				_grid[next.x, next.y] == TileType.Start || 
-				_grid[next2.x, next2.y] == TileType.Wall || 
-				_grid[next2.x, next2.y] == TileType.Start ||
-				_grid[next2.x, next2.y] == TileType.Hole ||
+				_grid[next.x, next.y] != TileType.None ||
+				_grid[next2.x, next2.y] != TileType.None ||
 				curDir == (Direction)dir
 			)
 			{
+				if (numTries > maxTries) return Direction.None;
+
 				dir = -1;
+				continue;
+			}
+		}
+
+		return (Direction)dir;
+	}
+
+
+	private Direction GetDirection(Vector2Int cur, out Vector2Int next, out Vector2Int next2, Direction? curDir = null)
+	{
+		int dir = -1;
+
+		int maxTries = 100;
+		int numTries = 0;
+
+		next = cur;
+		next2 = cur;
+
+		while (dir < 0)
+		{
+			numTries++;
+
+			dir = Random.Range(0, 4);
+
+			next = GetNextTile(cur, (Direction)dir);
+			next2 = GetNextTile(next, (Direction)dir);
+
+			if
+			(
+				next2.x < 0 ||
+				next2.y < 0 ||
+				next2.x >= _properties.size.x ||
+				next2.y >= _properties.size.y ||
+				!(_grid[next.x, next.y] == TileType.None || _grid[next.x, next.y] == TileType.Path || _grid[next.x, next.y] == TileType.Push) ||
+				!(_grid[next2.x, next2.y] == TileType.None || _grid[next2.x, next2.y] == TileType.Path || _grid[next2.x, next2.y] == TileType.Push) ||
+				curDir == (Direction)dir
+			)
+			{
+				if (numTries > maxTries) return Direction.None;
+
+				dir = -1;
+				continue;
 			}
 		}
 
@@ -117,13 +182,9 @@ public class MapGenerator : MonoBehaviour
 			next2.x < 0 || 
 			next2.y < 0 || 
 			next2.x >= _properties.size.x || 
-			next2.y >= _properties.size.y || 
-			_grid[next.x, next.y] == TileType.Hole || 
-			_grid[next.x, next.y] == TileType.Wall || 
-			_grid[next2.x, next2.y] == TileType.Hole || 
-			_grid[next2.x, next2.y] == TileType.Wall ||
-			_grid[next2.x, next2.y] == TileType.Start ||
-			_grid[next2.x, next2.y] == TileType.End
+			next2.y >= _properties.size.y ||
+			_grid[next.x, next.y] != TileType.None ||
+			_grid[next2.x, next2.y] != TileType.None
 		) return false;
 
 		return true;
@@ -131,7 +192,7 @@ public class MapGenerator : MonoBehaviour
 
 	private void GenerateLayout()
 	{
-		_grid = ArrayUtilities.CreateAndFill(_properties.size.x, _properties.size.y, TileType.Floor);
+		_grid = ArrayUtilities.CreateAndFill(_properties.size.x, _properties.size.y, TileType.None);
 
 		for (int i = 0; i < _grid.GetLength(0); i++)
 		{
@@ -206,9 +267,31 @@ public class MapGenerator : MonoBehaviour
 
 	private void PlaceBoulders(Vector2Int loc)
 	{
-		Direction dir = GetDirection(loc);
+		Vector2Int orig = loc;
+		Vector2Int move = loc;
+		Vector2Int move2 = move;
+		Direction dir = GetDirection(loc, out move, out move2);
+		TileType t = _grid[loc.x, loc.y];
+		do
+		{
+			Direction dirLast = dir;
 
+			if (dir == Direction.None) break;
 
+			if (_grid[loc.x, loc.y] != TileType.Hole) _grid[loc.x, loc.y] = TileType.Path;
+			_grid[move.x, move.y] = TileType.Boulder;
+			_grid[move2.x, move2.y] = TileType.Push;
+
+			loc = move;
+			dir = GetDirection(loc, out move, out move2);
+
+		} while (Random.value > _properties.boulderMoveProb);
+
+		if (dir != Direction.None) _grid[move2.x, move2.y] = TileType.Push;
+
+		Debug.Log(_grid[orig.x, orig.y] == t);
+
+		if (!(_grid[orig.x, orig.y] == t)) Debug.Log(_grid[orig.x, orig.y]);
 	}
 
 	private void GenerateBoulders()
@@ -223,11 +306,5 @@ public class MapGenerator : MonoBehaviour
 				}
 			}
 		}
-	}
-
-	private void Awake()
-	{
-		GenerateLayout();
-		PlaceTiles();
 	}
 }

@@ -4,18 +4,27 @@ using UnityEngine;
 
 public enum TileType
 {
-	Floor,
+	None,
 	Ice,
 	Wall,
+	Water,
 	Hole,
 	Start,
 	End,
-	Path
+	Floor,
+	Path,
+	Push,
+	Boulder
 }
 
 public class Tile
 {
 	public TileType type = TileType.Floor;
-	public bool hasBolder = false;
-	public GameObject bolderGameObject = null;
+	public bool hasBoulder = false;
+	public GameObject boulderGameObject = null;
+
+	public Tile(TileType type)
+	{
+		this.type = type;
+	}
 }

@@ -40,7 +40,7 @@ public class Player : MonoBehaviour
 			else
 			{
 				Tile next = _gridMs.TileAt(_myGridId, _position + _moving);
-				if (next != null && next.type == TileType.Ice && !next.hasBolder)
+				if (next != null && next.type == TileType.Ice && !next.hasBoulder)
 				{
 					_moveStart = Time.time;
 					_position += _moving;
